@@ -1,0 +1,46 @@
+services:
+  traefik:
+    image: "traefik:v3.1"
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./acme.json:/acme.json
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.htttp.routers.dashboards.entrypoint=websecure"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.example.com`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=leresolver"
+      - "traefik.http.middlewares.web-auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}"
+      - "traefik.http.routers.dashboard.middlewares=web-auth"
+    command:
+      - "--global.sendanonymoususage=false"
+      - "--global.checknewversion=false"
+      - "--tracing=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.defaultRule=Host(`{{ .Name }}.example.com`)"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--certificatesresolvers.leresolver.acme.email=${CER_EMAIL}"
+      - "--certificatesresolvers.leresolver.acme.storage=/acme.json"
+      - "--certificatesresolvers.leresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.leresolver.acme.caserver= https://acme-v02.api.letsencrypt.org/directory" # https://acme-staging-v02.api.letsencrypt.org/directory use this for dev
+      - "--log=true"
+      - "--log.level=ERROR"
+      - "--accesslog=true"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK}
