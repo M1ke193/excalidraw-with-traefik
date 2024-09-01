@@ -6,12 +6,12 @@ services:
       network: host
       args:
         GIT_COMMIT_SHA_CLIENT: ${GIT_COMMIT_SHA_CLIENT}
-    container_name: excalidraw
+    image: excalidraw-frontend
     healthcheck:
       disable: true
     environment:
       - NODE_ENV=production
-    restart: on-failure
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK}"
@@ -33,13 +33,14 @@ services:
       context: https://github.com/kitsteam/excalidraw-storage-backend.git#${GIT_TAG_STORAGE_BACKEND}
       target: production
       network: host
+    image: excalidraw-backend
     environment:
       STORAGE_URI: redis://:${REDIS_PASSWORD}@redis:6379
       STORAGE_TTL: 2592000000
     depends_on:
       redis:
         condition: service_healthy
-    restart: always
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK}"
@@ -62,7 +63,7 @@ services:
 
   excalidraw-room:
     image: excalidraw/excalidraw-room
-    restart: always
+    restart: unless-stopped
     environment:
       CORS_ORIGIN: https://example.com
     labels:
@@ -89,7 +90,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always
+    restart: unless-stopped
     networks:
       - db
 
