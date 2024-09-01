@@ -17,7 +17,7 @@ services:
       - "traefik.docker.network=${TRAEFIK_NETWORK}"
 
       - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.rule=Host(`example.com`)"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN_NAME}`)"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=leresolver"
 
@@ -46,14 +46,14 @@ services:
       - "traefik.docker.network=${TRAEFIK_NETWORK}"
 
       - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.rule=Host(`backend.example.com`)"
+      - "traefik.http.routers.backend.rule=Host(`backend.${DOMAIN_NAME}`)"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=leresolver"
 
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
       - "traefik.http.routers.backend.service=backend"
 
-      - "traefik.http.middlewares.cors_excalidraw.headers.accesscontrolalloworiginlist=https://example.com"
+      - "traefik.http.middlewares.cors_excalidraw.headers.accesscontrolalloworiginlist=https://${DOMAIN_NAME}"
       - "traefik.http.middlewares.cors_excalidraw.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
       - "traefik.http.middlewares.cors_excalidraw.headers.accesscontrolallowheaders=*"
       - "traefik.http.routers.backend.middlewares=cors_excalidraw"
@@ -65,13 +65,13 @@ services:
     image: excalidraw/excalidraw-room
     restart: unless-stopped
     environment:
-      CORS_ORIGIN: https://example.com
+      CORS_ORIGIN: https://${DOMAIN_NAME}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK}"
 
       - "traefik.http.routers.room.entrypoints=websecure"
-      - "traefik.http.routers.room.rule=Host(`room.example.com`)"
+      - "traefik.http.routers.room.rule=Host(`room.${DOMAIN_NAME}`)"
       - "traefik.http.routers.room.tls=true"
       - "traefik.http.routers.room.tls.certresolver=leresolver"
 
