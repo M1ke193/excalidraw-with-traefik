@@ -2,7 +2,7 @@ services:
   excalidraw:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
       network: host
       args:
         GIT_COMMIT_SHA_CLIENT: ${GIT_COMMIT_SHA_CLIENT}

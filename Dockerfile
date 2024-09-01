@@ -1,14 +1,18 @@
-FROM node:18 AS build
+FROM alpine/git AS clone_code
 
 ARG GIT_COMMIT_SHA_CLIENT
 
-WORKDIR /opt/node_app
-
-RUN apt-get update && apt-get install -y git
+WORKDIR /app
 
 RUN git clone https://github.com/b310-digital/excalidraw.git . && \
     git checkout ${GIT_COMMIT_SHA_CLIENT} && \
     rm .env.production
+
+FROM node:18 AS build
+
+WORKDIR /opt/node_app
+
+COPY --from=clone_code /app /opt/node_app
 
 COPY .env.production .
 
@@ -22,4 +26,4 @@ FROM nginxinc/nginx-unprivileged:1.25-alpine-slim as production
 
 COPY --from=build /opt/node_app/excalidraw-app/build /usr/share/nginx/html
 
-HEALTHCHECK CMD wget -q -O /dev/null http://localhost || exit 1
+HEALTHCHECK CMD wget -q -O /dev/null http://127.0.0.1:8080 || exit 1
